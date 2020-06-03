@@ -16,6 +16,10 @@ end
 
 group :development do
   gem 'listen', '>= 3.0.5', '< 3.2'
+  gem 'rubocop', '0.77.0'
+  gem 'rubocop-performance', '~> 1.5.1'
+  gem 'rubocop-rails', '~> 2.4.0'
+  gem 'rubocop-rspec', '~> 1.37.1'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
 end
