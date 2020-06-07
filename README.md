@@ -34,6 +34,7 @@ From the project directory, run:
 - I rely on Rails active record validations to validate each record being imported
 - I save student names in addition to the other data and made these required fields
 - Therefore for a record to be valid it must have: `test_id`, `student_number`, `marks_available`, `marks_obtained`, as well as `student_first_name` and `student_last_name`
+- `test_id` and `student_number` are saved as strings to give the most flexibility (for exaple student 'numbers' are often alpha-numeric).
 
 ### Rejecting records
 "it's important that you reject the _entire_ document with an appropriate HTTP error" 
@@ -54,3 +55,9 @@ From the project directory, run:
 
 ### Other
   - There is a comment about persistent storage. I interpreted this to just mean saved to a database. I'm not sure if it meant something more.
+
+## Potential improvements
+- In hindsight, there might be a better name for `test_results` that makes it clear it's not related to the project test suite.
+- Despite abstracting some logic into a Ruby class, the test results controller is still quite heavy. At Discolabs we have been using the interactor gem to perform any business logic, leaving controllers very light.
+- As mentioned, rejecting an entire import batch only gives info about the first record that was found to be invalid. It might be better to validate the entire import and return information on all invalid records.
+- There is no model representing the test itself.
