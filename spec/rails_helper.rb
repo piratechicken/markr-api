@@ -40,3 +40,9 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = false
   config.include FactoryBot::Syntax::Methods
 end
+
+# This helper method returns an XML fixture from the given path as a string.
+def xml_fixture(path)
+  filename = Rails.root.join('spec', 'fixtures', 'xml', "#{path}.xml")
+  File.read(filename)
+end
