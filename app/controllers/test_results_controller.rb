@@ -3,7 +3,6 @@ class TestResultsController < ApplicationController
   prepend_before_action :import_valid
 
   def import
-
     imported_test_results = import_as_hash.dig(:mcq_test_results, :mcq_test_result)
 
     TestResult.transaction do
@@ -18,8 +17,13 @@ class TestResultsController < ApplicationController
     end
 
     render(status: :created)
-  rescue ActiveRecord::RecordInvalid
-    render(status: :unprocessable_entity)
+  rescue ActiveRecord::RecordInvalid => e
+    errors_hash = {
+      student_number: e.record.student_number,
+      test_id: e.record.test_id,
+      errors: e.record.errors
+    }
+    render(json: errors_hash, status: :unprocessable_entity)
   end
 
   private
