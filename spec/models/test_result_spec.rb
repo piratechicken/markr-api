@@ -1,9 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe TestResult, type: :model do
-  # describe 'uniqueness' do
-  #   it { is_expected.to validate_uniqueness_of(:student_number).scoped_to(:test_id) }
-  # end
+  describe 'uniqueness' do
+    before { create(:test_result) }
+
+    it { is_expected.to validate_uniqueness_of(:student_number).scoped_to(:test_id) }
+  end
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:test_id) }
