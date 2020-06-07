@@ -13,7 +13,7 @@ RSpec.describe '/test_results', type: :request do
         end.to change(TestResult, :count).by(3)
       end
 
-      it 'renders a JSON response with the new test_result' do
+      it 'renders status: 201' do
         post('/import', params: xml_fixture('simple_test_results'), headers: valid_headers)
 
         expect(response).to have_http_status(:created)
@@ -21,7 +21,7 @@ RSpec.describe '/test_results', type: :request do
     end
 
     context 'with the provided example xml data' do
-      it 'creates three new TestResults' do
+      it 'creates 81 new TestResults' do
         expect do
           post('/import', params: xml_fixture('example_test_results'), headers: valid_headers)
           expect(
@@ -31,7 +31,7 @@ RSpec.describe '/test_results', type: :request do
         end.to change(TestResult, :count).by(81)
       end
 
-      it 'renders a JSON response with the new test_result' do
+      it 'renders status: 201' do
         post('/import', params: xml_fixture('example_test_results'), headers: valid_headers)
 
         expect(response).to have_http_status(:created)
@@ -130,11 +130,19 @@ RSpec.describe '/test_results', type: :request do
     end
 
     context 'with a valid xml body' do
-      it 'renders a JSON response with the new test_result' do
+      it 'renders a JSON response with correct test metrics' do
         get('/results/123/aggregate')
 
         expect(response).to have_http_status(:ok)
         expect(parsed_body(response)).to eq(expected_aggregate_body)
+      end
+    end
+
+    context 'when there is no test data' do
+      it 'renders status 404' do
+        get('/results/124/aggregate')
+
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
