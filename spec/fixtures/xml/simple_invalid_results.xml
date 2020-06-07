@@ -17,6 +17,6 @@
 		<mcq-test-result scanned-on="2017-12-04T12:12:10+11:00">
 				<student-number>5215851283</student-number>
 				<test-id>1234</test-id>
-				<summary-marks available="20" obtained="9" />
+				<summary-marks available="20" />
 		</mcq-test-result>
 </mcq-test-results>

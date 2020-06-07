@@ -109,6 +109,7 @@ RSpec.describe '/test_results', type: :request do
         student_number: '5215851283',
         test_id: '1234',
         errors: {
+          marks_obtained: ["can't be blank"],
           student_first_name: ["can't be blank"],
           student_last_name: ["can't be blank"]
         }
