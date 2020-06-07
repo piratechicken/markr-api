@@ -120,6 +120,25 @@ RSpec.describe '/test_results', type: :request do
     end
   end
 
+  describe 'GET results/:test_id/aggregate' do
+    before do
+      create(:test_result, test_id: 123, marks_available: 20, marks_obtained: 3)
+      create(:test_result, test_id: 123, marks_available: 20, marks_obtained: 20)
+      create(:test_result, test_id: 123, marks_available: 10, marks_obtained: 9)
+      create(:test_result, test_id: 123, marks_available: 30, marks_obtained: 16)
+      create(:test_result, test_id: 123, marks_available: 25, marks_obtained: 20)
+    end
+
+    context 'with a valid xml body' do
+      it 'renders a JSON response with the new test_result' do
+        get('/results/123/aggregate')
+
+        expect(response).to have_http_status(:ok)
+        expect(parsed_body(response)).to eq(expected_aggregate_body)
+      end
+    end
+  end
+
   private
 
     def expected_validation_errors
@@ -132,5 +151,22 @@ RSpec.describe '/test_results', type: :request do
           student_last_name: ["can't be blank"]
         }
       }
+    end
+
+    def expected_aggregate_body
+      {
+        mean: 67.7,
+        stddev: 34.2,
+        min: 15.0,
+        max: 100.0,
+        p25: 53.3,
+        p50: 80.0,
+        p75: 90.0,
+        count: 5
+      }
+    end
+
+    def parsed_body(response)
+      JSON.parse(response.body, symbolize_names: true)
     end
 end
