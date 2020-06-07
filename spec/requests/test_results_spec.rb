@@ -20,6 +20,24 @@ RSpec.describe '/test_results', type: :request do
       end
     end
 
+    context 'with the provided example xml data' do
+      it 'creates three new TestResults' do
+        expect do
+          post('/import', params: xml_fixture('example_test_results'), headers: valid_headers)
+          expect(
+            # Duplicated result in import takes the higher mark
+            TestResult.find_by(student_number: 2306, test_id: 9863).marks_obtained
+          ).to eq(13)
+        end.to change(TestResult, :count).by(81)
+      end
+
+      it 'renders a JSON response with the new test_result' do
+        post('/import', params: xml_fixture('example_test_results'), headers: valid_headers)
+
+        expect(response).to have_http_status(:created)
+      end
+    end
+
     context 'with an unexpected Content-Type header' do
       let(:invalid_headers) { { 'Content-Type': 'text/xml' } }
 
