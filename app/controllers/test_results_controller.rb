@@ -7,23 +7,13 @@ class TestResultsController < ApplicationController
 
     TestResult.transaction do
       imported_test_results.each do |incoming_test_data|
-        test_result_record = TestResult.find_or_initialize_by(
-          test_id: incoming_test_data[:test_id],
-          student_number: incoming_test_data[:student_number]
-        )
-        test_result_record.assign_attributes(parse_test_result(incoming_test_data, test_result_record))
-        test_result_record.save!
+        generate_test_result(incoming_test_data)
       end
     end
 
     render(status: :created)
   rescue ActiveRecord::RecordInvalid => e
-    errors_hash = {
-      student_number: e.record.student_number,
-      test_id: e.record.test_id,
-      errors: e.record.errors
-    }
-    render(json: errors_hash, status: :unprocessable_entity)
+    render(json: validation_errors_to_hash(e), status: :unprocessable_entity)
   end
 
   def aggregate
@@ -65,6 +55,15 @@ class TestResultsController < ApplicationController
 
   private
 
+    def generate_test_result(incoming_test_data)
+      test_result_record = TestResult.find_or_initialize_by(
+        test_id: incoming_test_data[:test_id],
+        student_number: incoming_test_data[:student_number]
+      )
+      test_result_record.assign_attributes(parse_test_result(incoming_test_data, test_result_record))
+      test_result_record.save!
+    end
+
     def parse_test_result(incoming_test_data, test_result_record)
       new_marks_obtained = incoming_test_data.dig(:summary_marks, :obtained)&.to_i
       {
@@ -91,6 +90,14 @@ class TestResultsController < ApplicationController
     def calculate_percentile_index(percentile, count)
       # Can floor rank as using for array index
       (percentile / 100.0 * count).to_i
+    end
+
+    def validation_errors_to_hash(error)
+      {
+        student_number: error.record.student_number,
+        test_id: error.record.test_id,
+        errors: error.record.errors
+      }
     end
 
 end
