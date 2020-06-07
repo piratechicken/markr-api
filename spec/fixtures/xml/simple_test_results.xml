@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mcq-test-results>
+		<mcq-test-result scanned-on="2017-12-04T12:12:10+11:00">
+				<first-name>Jane</first-name>
+				<last-name>Austen</last-name>
+				<student-number>52158351281</student-number>
+				<test-id>1234</test-id>
+				<summary-marks available="20" obtained="13" />
+		</mcq-test-result>
+		<mcq-test-result scanned-on="2017-12-04T12:12:10+11:00">
+				<first-name>Fitzwilliam</first-name>
+				<last-name>Darcy</last-name>
+				<student-number>52155851282</student-number>
+				<test-id>1234</test-id>
+				<summary-marks available="20" obtained="10" />
+		</mcq-test-result>
+		<mcq-test-result scanned-on="2017-12-04T12:12:10+11:00">
+				<first-name>Liz</first-name>
+				<last-name>Bennet</last-name>
+				<student-number>5215851283</student-number>
+				<test-id>1234</test-id>
+				<summary-marks available="20" obtained="9" />
+		</mcq-test-result>
+</mcq-test-results>
