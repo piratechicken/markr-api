@@ -5,14 +5,11 @@ Ruby 2.6.5, Rails 6.0.2
 ### First time set up
 From the project directory, run:
 - `docker-compose build` (This will take a couple of minutes)
-- `docker-compose up [--detach]` (detach will run in background)
 - `docker-compose run web rails db:create`
 - `docker-compose run web rails db:migrate`
+- To run tests: `docker-compose run web bundle exec rspec`
+- To run server (detach will run in background): `docker-compose up [--detach]`
 Check for the "Yay! You’re on Rails!" page on http://localhost:3000
-
-### To run subsequently
-From the project directory, run:
-- `docker-compose up [--detach]`
 
 ## Project requirements
 ### Import
