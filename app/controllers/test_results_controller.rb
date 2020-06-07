@@ -1,6 +1,6 @@
 class TestResultsController < ApplicationController
 
-  prepend_before_action :import_valid
+  prepend_before_action :validate_import
 
   def import
     imported_test_results = import_as_hash.dig(:mcq_test_results, :mcq_test_result)
@@ -38,7 +38,7 @@ class TestResultsController < ApplicationController
       }
     end
 
-    def import_valid
+    def validate_import
       valid_request_header = request.headers['Content-Type'] == 'text/xml+markr'
       valid_body = import_as_hash.key?(:mcq_test_results)
 
