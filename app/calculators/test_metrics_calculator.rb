@@ -1,4 +1,4 @@
-class TestSummaryMetrics
+class TestMetricsCalculator
 
   attr_reader :test_result_array
 

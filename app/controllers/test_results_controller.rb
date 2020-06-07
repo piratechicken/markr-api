@@ -22,7 +22,7 @@ class TestResultsController < ApplicationController
     render(status: :not_found) && return if test_results.blank?
 
     results_as_percentage = test_results.map(&:mark_as_percentage)
-    summary_metrics = ::TestSummaryMetrics.new(test_result_array: results_as_percentage)
+    summary_metrics = ::TestMetricsCalculator.new(test_result_array: results_as_percentage)
 
     render(json: summary_metrics.metrics, status: :ok)
   end
