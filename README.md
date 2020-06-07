@@ -5,7 +5,7 @@ Ruby 2.6.5, Rails 6.0.2
 ### First time set up
 From the project directory, run:
 - `docker-compose build` (This will take a couple of minutes)
-- `docker-compose up [--detach]`
+- `docker-compose up [--detach]` (detach will run in background)
 - `docker-compose run web rails db:create`
 - `docker-compose run web rails db:migrate`
 Check for the "Yay! You’re on Rails!" page on http://localhost:3000
@@ -27,3 +27,30 @@ From the project directory, run:
   - `mean` - the mean of the awarded marks
   - `count` - the number of students who took the test
   - `p25`, `p50`, `p75` - the 25th percentile, median, and 75th percentile scores
+
+## Assumptions and summary
+### Validations
+- Test results are saved to the test_results table
+- I rely on Rails active record validations to validate each record being imported
+- I save student names in addition to the other data and made these required fields
+- Therefore for a record to be valid it must have: `test_id`, `student_number`, `marks_available`, `marks_obtained`, as well as `student_first_name` and `student_last_name`
+
+### Rejecting records
+"it's important that you reject the _entire_ document with an appropriate HTTP error" 
+- I interpreted this as meaning the entire batch of tests being imported should be rejected (if some are saved and some not, you wouldn't expect an HTTP error status)
+- This is done by wrapping the `save!` in a transaction block, so that if one record is invalid it will raise an error. This error is caught and returned with a status of 422.
+- This will only give information for the first invalid record being imported as it aborts the method
+
+### Updating records
+- I realised this could mean for a single import, when looking at the sample result provided.
+- Using `TestRecord.find_or_initialize_by` takes this into account as well as already saved records.
+- I wasn't sure if available marks could change, either between students' results for a particular test (e.g. are there students that do different sections for a different available total?) or in duplicate scans of an individual students test (e.g. if there is a marks obtained error, could there be a marks available error?)
+- I update both marks obtained and marks available to the highest received.
+
+### Aggregating test results
+- I moved the calculation of summary metrics into a plain Ruby object, which is initialised by an array of scores.
+- The `#metrics` method returns a hash aligning to the form expected in the response
+- There was a small mismatch between the values that were specifically requested in the text and those in the example json. I chose to return all values in the example (those requested with the addition of `stdev` `min` and `max`).
+
+### Other
+  - There is a comment about persistent storage. I interpreted this to just mean saved to a database. I'm not sure if it meant something more.
