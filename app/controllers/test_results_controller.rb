@@ -28,6 +28,9 @@ class TestResultsController < ApplicationController
 
   def aggregate
     test_results = TestResult.where(test_id: params[:test_id])
+
+    render(status: :not_found) && return if test_results.blank?
+
     results_as_percentage = test_results.map(&:mark_as_percentage)
 
     count = results_as_percentage.count
