@@ -13,7 +13,7 @@ RSpec.describe '/test_results', type: :request do
         end.to change(TestResult, :count).by(3)
       end
 
-      it 'renders a JSON response with the new test_result' do
+      it 'renders status: 201' do
         post('/import', params: xml_fixture('simple_test_results'), headers: valid_headers)
 
         expect(response).to have_http_status(:created)
@@ -21,7 +21,7 @@ RSpec.describe '/test_results', type: :request do
     end
 
     context 'with the provided example xml data' do
-      it 'creates three new TestResults' do
+      it 'creates 81 new TestResults' do
         expect do
           post('/import', params: xml_fixture('example_test_results'), headers: valid_headers)
           expect(
@@ -31,7 +31,7 @@ RSpec.describe '/test_results', type: :request do
         end.to change(TestResult, :count).by(81)
       end
 
-      it 'renders a JSON response with the new test_result' do
+      it 'renders status: 201' do
         post('/import', params: xml_fixture('example_test_results'), headers: valid_headers)
 
         expect(response).to have_http_status(:created)
@@ -51,7 +51,7 @@ RSpec.describe '/test_results', type: :request do
         post('/import', params: xml_fixture('simple_test_results'), headers: invalid_headers)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to eq('error' => 'Invalid request')
+        expect(parsed_body(response)).to eq(error: 'Invalid request')
       end
     end
 
@@ -66,7 +66,7 @@ RSpec.describe '/test_results', type: :request do
         post('/import', params: xml_fixture('test_result_invalid_key'), headers: valid_headers)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body, symbolize_names: true)).to eq(error: 'Invalid request')
+        expect(parsed_body(response)).to eq(error: 'Invalid request')
       end
     end
 
@@ -115,7 +115,34 @@ RSpec.describe '/test_results', type: :request do
         post('/import', params: xml_fixture('simple_invalid_results'), headers: valid_headers)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body, symbolize_names: true)).to eq(expected_validation_errors)
+        expect(parsed_body(response)).to eq(expected_validation_errors)
+      end
+    end
+  end
+
+  describe 'GET results/:test_id/aggregate' do
+    before do
+      create(:test_result, test_id: 123, marks_available: 20, marks_obtained: 3)
+      create(:test_result, test_id: 123, marks_available: 20, marks_obtained: 20)
+      create(:test_result, test_id: 123, marks_available: 10, marks_obtained: 9)
+      create(:test_result, test_id: 123, marks_available: 30, marks_obtained: 16)
+      create(:test_result, test_id: 123, marks_available: 25, marks_obtained: 20)
+    end
+
+    context 'with a valid xml body' do
+      it 'renders a JSON response with correct test metrics' do
+        get('/results/123/aggregate')
+
+        expect(response).to have_http_status(:ok)
+        expect(parsed_body(response)).to eq(expected_aggregate_body)
+      end
+    end
+
+    context 'when there is no test data' do
+      it 'renders status 404' do
+        get('/results/124/aggregate')
+
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
@@ -132,5 +159,22 @@ RSpec.describe '/test_results', type: :request do
           student_last_name: ["can't be blank"]
         }
       }
+    end
+
+    def expected_aggregate_body
+      {
+        mean: 67.7,
+        stddev: 34.2,
+        min: 15.0,
+        max: 100.0,
+        p25: 53.3,
+        p50: 80.0,
+        p75: 90.0,
+        count: 5
+      }
+    end
+
+    def parsed_body(response)
+      JSON.parse(response.body, symbolize_names: true)
     end
 end
