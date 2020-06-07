@@ -7,4 +7,8 @@ class TestResult < ApplicationRecord
   validates :marks_available, presence: true
   validates :marks_obtained, presence: true
 
+  def mark_as_percentage
+    100.0 * marks_obtained / marks_available
+  end
+
 end
