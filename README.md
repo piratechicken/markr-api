@@ -7,6 +7,8 @@ From the project directory, run:
 - `docker-compose build` (This will take a couple of minutes)
 - `docker-compose run web rails db:create`
 - `docker-compose run web rails db:migrate`
+
+### Then...
 - To run tests: `docker-compose run web bundle exec rspec`
 - To run server (detach will run in background): `docker-compose up [--detach]`
 Check for the "Yay! You’re on Rails!" page on http://localhost:3000
