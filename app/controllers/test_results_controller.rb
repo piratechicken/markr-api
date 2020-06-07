@@ -1,12 +1,19 @@
 class TestResultsController < ApplicationController
 
+  prepend_before_action :import_valid
+
   def import
-    body_as_hash = Hash.from_xml(request.body.read).with_indifferent_access
-    test_results = body_as_hash.dig(:mcq_test_results, :mcq_test_result)
+
+    imported_test_results = import_as_hash.dig(:mcq_test_results, :mcq_test_result)
 
     TestResult.transaction do
-      test_results.each do |test_result|
-        TestResult.create!(parse_test_result(test_result))
+      imported_test_results.each do |incoming_test_data|
+        test_result_record = TestResult.find_or_initialize_by(
+          test_id: incoming_test_data[:test_id],
+          student_number: incoming_test_data[:student_number]
+        )
+        test_result_record.assign_attributes(parse_test_result(incoming_test_data, test_result_record))
+        test_result_record.save!
       end
     end
 
@@ -15,15 +22,29 @@ class TestResultsController < ApplicationController
     render(status: :unprocessable_entity)
   end
 
-  def parse_test_result(test_result)
-    {
-      test_id: test_result[:test_id],
-      student_number: test_result[:student_number],
-      student_first_name: test_result[:first_name],
-      student_last_name: test_result[:last_name],
-      marks_available: test_result.dig(:summary_marks, :available)&.to_i,
-      marks_obtained: test_result.dig(:summary_marks, :obtained)&.to_i
-    }
-  end
+  private
+
+    def parse_test_result(incoming_test_data, test_result_record)
+      new_marks_obtained = incoming_test_data.dig(:summary_marks, :obtained)&.to_i
+      {
+        student_first_name: incoming_test_data[:first_name],
+        student_last_name: incoming_test_data[:last_name],
+        marks_available: incoming_test_data.dig(:summary_marks, :available)&.to_i,
+        marks_obtained: [new_marks_obtained, test_result_record.marks_obtained].compact.max
+      }
+    end
+
+    def import_valid
+      valid_request_header = request.headers['Content-Type'] == 'text/xml+markr'
+      valid_body = import_as_hash.key?(:mcq_test_results)
+
+      return if valid_request_header && valid_body
+
+      render(json: { error: 'Invalid request' }, status: :unprocessable_entity)
+    end
+
+    def import_as_hash
+      @import_as_hash ||= Hash.from_xml(request.body.read).with_indifferent_access
+    end
 
 end
