@@ -48,7 +48,7 @@ RSpec.describe '/test_results', type: :request do
         post('/import', params: xml_fixture('test_result_invalid_key'), headers: valid_headers)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to eq('error' => 'Invalid request')
+        expect(JSON.parse(response.body, symbolize_names: true)).to eq(error: 'Invalid request')
       end
     end
 
@@ -71,5 +71,33 @@ RSpec.describe '/test_results', type: :request do
         end.to change(TestResult, :count).by(2)
       end
     end
+
+    context 'with an invalid set of test results (missing require attributes)' do
+      it 'does not create any incoming test results (rejects entire payload)' do
+        expect do
+          post('/import', params: xml_fixture('simple_invalid_results'), headers: valid_headers)
+        end.to change(TestResult, :count).by(0)
+      end
+
+      it 'renders a JSON response with expected errors' do
+        post('/import', params: xml_fixture('simple_invalid_results'), headers: valid_headers)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body, symbolize_names: true)).to eq(expected_validation_errors)
+      end
+    end
   end
+
+  private
+
+    def expected_validation_errors
+      {
+        student_number: '5215851283',
+        test_id: '1234',
+        errors: {
+          student_first_name: ["can't be blank"],
+          student_last_name: ["can't be blank"]
+        }
+      }
+    end
 end
