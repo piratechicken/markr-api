@@ -72,6 +72,20 @@ RSpec.describe '/test_results', type: :request do
       end
     end
 
+    context 'with a LOWER test mark for a test result that already exists' do
+      before do
+        create(:test_result, student_number: 52158351281, test_id: 1234, marks_obtained: 20)
+      end
+
+      it 'keeps the existing higher mark' do
+        post('/import', params: xml_fixture('simple_test_results'), headers: valid_headers)
+
+        expect(
+          TestResult.find_by(student_number: 52158351281, test_id: 1234).marks_obtained
+        ).to eq(20)
+      end
+    end
+
     context 'with an invalid set of test results (missing require attributes)' do
       it 'does not create any incoming test results (rejects entire payload)' do
         expect do
