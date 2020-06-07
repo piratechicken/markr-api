@@ -40,10 +40,11 @@ class TestResultsController < ApplicationController
 
     def parse_test_result(incoming_test_data, test_result_record)
       new_marks_obtained = incoming_test_data.dig(:summary_marks, :obtained)&.to_i
+      new_marks_available = incoming_test_data.dig(:summary_marks, :available)&.to_i
       {
         student_first_name: incoming_test_data[:first_name],
         student_last_name: incoming_test_data[:last_name],
-        marks_available: incoming_test_data.dig(:summary_marks, :available)&.to_i,
+        marks_available: [new_marks_available, test_result_record.marks_available].compact.max,
         marks_obtained: [new_marks_obtained, test_result_record.marks_obtained].compact.max
       }
     end
