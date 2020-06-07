@@ -51,7 +51,7 @@ RSpec.describe '/test_results', type: :request do
         post('/import', params: xml_fixture('simple_test_results'), headers: invalid_headers)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to eq('error' => 'Invalid request')
+        expect(parsed_body(response)).to eq(error: 'Invalid request')
       end
     end
 
@@ -66,7 +66,7 @@ RSpec.describe '/test_results', type: :request do
         post('/import', params: xml_fixture('test_result_invalid_key'), headers: valid_headers)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body, symbolize_names: true)).to eq(error: 'Invalid request')
+        expect(parsed_body(response)).to eq(error: 'Invalid request')
       end
     end
 
@@ -115,7 +115,7 @@ RSpec.describe '/test_results', type: :request do
         post('/import', params: xml_fixture('simple_invalid_results'), headers: valid_headers)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body, symbolize_names: true)).to eq(expected_validation_errors)
+        expect(parsed_body(response)).to eq(expected_validation_errors)
       end
     end
   end
